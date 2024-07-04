@@ -11,7 +11,6 @@ import datetime
 def test_replication(args):
     value_to_insert = str(datetime.datetime.now())
     status_message = ''
-
     cnx_master = cnx_slave = cursor_master = cursor_slave = None
 
     try:
@@ -32,7 +31,10 @@ def test_replication(args):
         cursor_master = cnx_master.cursor()
 
         # Execute the insertion to the master
-        cursor_master.execute(f"INSERT INTO {args.table} (value) VALUES (%s)", (value_to_insert,))
+        # Since there is an id field, we select max id and increment it for the new record
+        cursor_master.execute(f"SELECT MAX(id) FROM {args.table}")
+        max_id = cursor_master.fetchone()[0] or 0
+        cursor_master.execute(f"INSERT INTO {args.table} (id, info) VALUES (%s, %s)", (max_id + 1, value_to_insert))
         cnx_master.commit()
 
         # Now connect to the slave
@@ -41,15 +43,15 @@ def test_replication(args):
         cursor_slave = cnx_slave.cursor()
 
         # Check if the new value has replicated to the slave
-        cursor_slave.execute(f"SELECT * FROM {args.table} WHERE value = %s", (value_to_insert,))
+        cursor_slave.execute(f"SELECT * FROM {args.table} WHERE info = %s", (value_to_insert,))
         row = cursor_slave.fetchone()
 
         if row is not None:
             status_message = 'Replication status: OK'
             # Remove the value from the test table on both master and slave
-            cursor_master.execute(f"DELETE FROM {args.table} WHERE value = %s", (value_to_insert,))
+            cursor_master.execute(f"DELETE FROM {args.table} WHERE id = %s", (max_id + 1,))
             cnx_master.commit()
-            cursor_slave.execute(f"DELETE FROM {args.table} WHERE value = %s", (value_to_insert,))
+            cursor_slave.execute(f"DELETE FROM {args.table} WHERE id = %s", (max_id + 1,))
             cnx_slave.commit()
         else:
             status_message = 'Replication status: FAIL'
@@ -85,4 +87,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
