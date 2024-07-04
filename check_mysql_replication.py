@@ -112,7 +112,6 @@ def main():
                         help='Path to mysql client options file containing connection credentials')
     parser.add_argument('--host', type=str, help='Hostname/IP')
     parser.add_argument('--port', type=int, help='MySQL port')
-    parser.add_argument('--use_ssl', action='store_true', help='Use SSL connection')
     parser.add_argument('--allow_self_signed', action='store_true', help='Accept self signed certificates')
     parser.add_argument('--socket', type=str, help='Path to local mysqld socket')
     parser.add_argument('--username', type=str, help='MySQL username')
