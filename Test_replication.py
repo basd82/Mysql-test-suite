@@ -12,6 +12,8 @@ def test_replication(args):
     value_to_insert = str(datetime.datetime.now())
     status_message = ''
 
+    cnx_master = cnx_slave = cursor_master = cursor_slave = None
+
     try:
         # Connection configuration
         config = {
@@ -54,11 +56,11 @@ def test_replication(args):
     except mysql.connector.Error as err:
         status_message = 'An error occurred: {}'.format(err)
     finally:
-        if cnx_master.is_connected():
+        if cnx_master and cnx_master.is_connected():
             cursor_master.close()
             cnx_master.close()
 
-        if cnx_slave.is_connected():
+        if cnx_slave and cnx_slave.is_connected():
             cursor_slave.close()
             cnx_slave.close()
 
@@ -83,3 +85,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
