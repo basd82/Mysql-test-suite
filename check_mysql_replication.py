@@ -96,6 +96,15 @@ def check_replication_status(args):
 
     print(response_msg)
 
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 def main():
     parser = argparse.ArgumentParser(description='Check MySQL replica status.')
@@ -112,6 +121,9 @@ def main():
                         help='Warning delay of replica replication behind source (in seconds)')
     parser.add_argument('--critical_delay', type=int, default=30,
                         help='Critical delay of replica replication behind source (in seconds)')
+    parser.add_argument('--use_ssl', type=str2bool, nargs='?',
+                        const=True, default=False,
+                        help='Use SSL connection')
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
