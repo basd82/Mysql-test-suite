@@ -11,10 +11,10 @@ import sys
 
 
 def check_replication_status(args):
-    # Initialize SSL setting
-    ssl_disabled = {'use_pure': True, 'ssl_disabled': True} if not args.use_ssl else {'use_pure': True,
-                                                                                      'ssl_ca': '/etc/ssl/certs/ca-certificates.crt',
-                                                                                      'ssl_verify_cert': not args.allow_self_signed}
+    # Changes are here, add `not` before `args.use_ssl`
+    ssl_disabled = {'use_pure': True, 'ssl_disabled': not args.use_ssl} if not args.use_ssl else {'use_pure': True,
+                                                                                                  'ssl_ca': '/etc/ssl/certs/ca-certificates.crt',
+                                                                                                  'ssl_verify_cert': not args.allow_self_signed}
 
     # Read from configuration file if provided
     config = {}
@@ -22,7 +22,6 @@ def check_replication_status(args):
         config_parser = configparser.ConfigParser()
         config_parser.read(args.options_file)
         config = dict(config_parser['client'])
-
     # Override with command-line options
     if args.username: config['user'] = args.username
     if args.password: config['password'] = args.password
@@ -30,24 +29,19 @@ def check_replication_status(args):
     if args.port: config['port'] = args.port
     if args.socket: config['unix_socket'] = args.socket
     config['ssl_disabled'] = ssl_disabled
-
     response_msg = ""
-
     try:
         # Establish MySQL connection
         cnx = mysql.connector.connect(**config)
-
         cursor = cnx.cursor()
         # Execute the query to get the MySQL version
         cursor.execute("SELECT VERSION()")
         version = cursor.fetchone()[0]
-
         # Depending on version string execute the right query
         if "8.0" in version or "8.4" in version:
             cursor.execute("SHOW REPLICA STATUS")
         else:
             cursor.execute("SHOW SLAVE STATUS")
-
         # Fetch the status
         status = cursor.fetchone()
 
