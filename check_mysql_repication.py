@@ -7,6 +7,7 @@
 import argparse
 import mysql.connector
 import configparser
+import sys
 
 
 def check_replication_status(args):
@@ -112,6 +113,9 @@ def main():
     parser.add_argument('--critical_delay', type=int, default=30,
                         help='Critical delay of replica replication behind source (in seconds)')
 
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
     args = parser.parse_args()
     check_replication_status(args)
 
