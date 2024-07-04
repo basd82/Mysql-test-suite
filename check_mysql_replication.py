@@ -12,8 +12,9 @@ import sys
 
 def check_replication_status(args):
     # Initialize SSL setting
-    ssl_disabled = {'disabled': True} if not args.use_ssl else {'ca': '/etc/ssl/certs/ca-certificates.crt',
-                                                                'verify_cert': not args.allow_self_signed}
+    ssl_disabled = {'use_pure': True, 'ssl_disabled': True} if not args.use_ssl else {'use_pure': True,
+                                                                                      'ssl_ca': '/etc/ssl/certs/ca-certificates.crt',
+                                                                                      'ssl_verify_cert': not args.allow_self_signed}
 
     # Read from configuration file if provided
     config = {}
@@ -28,7 +29,6 @@ def check_replication_status(args):
     if args.host: config['host'] = args.host
     if args.port: config['port'] = args.port
     if args.socket: config['unix_socket'] = args.socket
-    config['client_flags'] = [mysql.connector.constants.ClientFlag.SSL]
     config['ssl_disabled'] = ssl_disabled
 
     response_msg = ""
@@ -96,6 +96,7 @@ def check_replication_status(args):
 
     print(response_msg)
 
+
 def str2bool(v):
     if isinstance(v, bool):
         return v
@@ -105,6 +106,7 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
+
 
 def main():
     parser = argparse.ArgumentParser(description='Check MySQL replica status.')
