@@ -15,6 +15,7 @@ except ModuleNotFoundError as err:
     print(f"A required module is not installed: {err}")
     sys.exit(1)
 
+
 def test_replication(args):
     value_to_insert = str(datetime.datetime.now())
     status_message = ''

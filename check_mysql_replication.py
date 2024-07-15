@@ -16,9 +16,9 @@ except ModuleNotFoundError as err:
 
 def check_replication_status(args):
     # Changes are here, add `not` before `args.use_ssl`
-    ssl_disabled = {'use_pure': True, 'ssl_disabled': not args.use_ssl} if not args.use_ssl else {'use_pure': True,
-                                                                                                  'ssl_ca': '/etc/ssl/certs/ca-certificates.crt',
-                                                                                                  'ssl_verify_cert': not args.allow_self_signed}
+    ssl_disabled = {'use_pure': True, 'ssl_disabled': not args.use_ssl} if not args.use_ssl else \
+        {'use_pure': True, 'ssl_ca': '/etc/ssl' '/certs' '/ca' '-certificates.crt', 'ssl_verify_cert':
+            not args.allow_self_signed}
 
     # Read from configuration file if provided
     config = {}
@@ -38,6 +38,10 @@ def check_replication_status(args):
         # Establish MySQL connection
         cnx = mysql.connector.connect(**config)
         cursor = cnx.cursor()
+    except mysql.connector.errors.InterfaceError as error:
+        print(f"ERROR: Cannot connect to the MySQL server: {error}")
+        sys.exit(1)
+    try:
         # Execute the query to get the MySQL version
         cursor.execute("SELECT VERSION()")
         version = cursor.fetchone()[0]
@@ -76,15 +80,17 @@ def check_replication_status(args):
                 else:
                     delay_status = "OK: Replica replication delay is within acceptable thresholds"
 
-                response_msg = f"IO: {io_running}, SQL: {sql_running}, Server: {source_server}, SSL: {ssl_allowed}, Delay: {delay}, {delay_status}"
+                response_msg = (f"IO: {io_running}, SQL: {sql_running}, Server: {source_server}, SSL: {ssl_allowed}, "
+                                f"Delay: {delay}, {delay_status}")
 
             else:
-                response_msg = "ERROR: Couldn't find 'Seconds_Behind_Master' or 'Seconds_Behind_Source' in the replica or slave status response!"
+                response_msg = ("ERROR: Couldn't find 'Seconds_Behind_Master' or 'Seconds_Behind_Source' in the "
+                                "replica or slave status response!")
         else:
             response_msg = "ERROR: No replication status available!"
 
-    except mysql.connector.Error as err:
-        response_msg = f"ERROR: Something went wrong: {str(err)}"
+    except mysql.connector.Error as error:
+        response_msg = f"ERROR: Something went wrong: {str(error)}"
 
     finally:
         # Close cursor and connection
