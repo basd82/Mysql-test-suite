@@ -3,11 +3,15 @@
 #  @copyright      Copyright (c) 2024  B.F. van den Dikkenberg All rights reserved.
 #  @license        GNU General Public License version 2 or later
 #
+try:
+    import argparse
+    import mysql.connector
+    import configparser
+    import sys
 
-import argparse
-import mysql.connector
-import configparser
-import sys
+except ModuleNotFoundError as err:
+    print(f"A required module is not installed: {err}")
+    sys.exit(1)
 
 
 def check_replication_status(args):
