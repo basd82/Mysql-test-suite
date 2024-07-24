@@ -6,7 +6,6 @@
 try:
     import argparse
     import mysql.connector
-    import mysql.connector.auth_plugin
     import configparser
     import sys
 
