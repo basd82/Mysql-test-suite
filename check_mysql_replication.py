@@ -6,6 +6,7 @@
 try:
     import argparse
     import mysql.connector
+    import mysql.connector.auth_plugin
     import configparser
     import sys
 
@@ -15,6 +16,7 @@ except ModuleNotFoundError as err:
 
 
 def check_replication_status(args):
+
     # Changes are here, add `not` before `args.use_ssl`
     ssl_disabled = {'use_pure': True, 'ssl_disabled': not args.use_ssl} if not args.use_ssl else \
         {'use_pure': True, 'ssl_ca': '/etc/ssl' '/certs' '/ca' '-certificates.crt', 'ssl_verify_cert':
@@ -33,6 +35,8 @@ def check_replication_status(args):
     if args.port: config['port'] = args.port
     if args.socket: config['unix_socket'] = args.socket
     config['ssl_disabled'] = ssl_disabled
+    config['auth_plugin'] = 'sha256_password'
+
     response_msg = ""
     try:
         # Establish MySQL connection
