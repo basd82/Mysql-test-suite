@@ -16,9 +16,9 @@ except ModuleNotFoundError as err:
 
 def check_replication_status(args):
     # Changes are here, add `not` before `args.use_ssl`
-    ssl_disabled = {'use_pure': True, 'ssl_disabled': not args.use_ssl} if not args.use_ssl else \
+    ssl_disabled = {'use_pure': True, 'ssl_disabled': not args.use_ssl, 'force_ssl': True} if not args.use_ssl else \
         {'use_pure': True, 'ssl_ca': '/etc/ssl' '/certs' '/ca' '-certificates.crt', 'ssl_verify_cert':
-            not args.allow_self_signed}
+            not args.allow_self_signed, 'force_ssl': True}
 
     # Read from configuration file if provided
     config = {}
