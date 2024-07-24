@@ -8,25 +8,22 @@ try:
     import mysql.connector
     import configparser
     import sys
-
 except ModuleNotFoundError as err:
     print(f"A required module is not installed: {err}")
     sys.exit(1)
 
 
 def check_replication_status(args):
-    # Changes are here, add `not` before `args.use_ssl`
     ssl_disabled = {'use_pure': True, 'ssl_disabled': not args.use_ssl, 'force_ssl': True} if not args.use_ssl else \
-        {'use_pure': True, 'ssl_ca': '/etc/ssl' '/certs' '/ca' '-certificates.crt', 'ssl_verify_cert':
+        {'use_pure': True, 'ssl_ca': args.ssl_ca, 'ssl_verify_cert':
             not args.allow_self_signed, 'force_ssl': True}
 
-    # Read from configuration file if provided
     config = {}
     if args.options_file:
         config_parser = configparser.ConfigParser()
         config_parser.read(args.options_file)
         config = dict(config_parser['client'])
-    # Override with command-line options
+
     if args.username: config['user'] = args.username
     if args.password: config['password'] = args.password
     if args.host: config['host'] = args.host
@@ -35,65 +32,44 @@ def check_replication_status(args):
     config['ssl_disabled'] = ssl_disabled
     response_msg = ""
     try:
-        # Establish MySQL connection
         cnx = mysql.connector.connect(**config)
         cursor = cnx.cursor()
     except mysql.connector.errors.InterfaceError as error:
         print(f"ERROR: Cannot connect to the MySQL server: {error}")
         sys.exit(1)
     try:
-        # Execute the query to get the MySQL version
         cursor.execute("SELECT VERSION()")
         version = cursor.fetchone()[0]
-        # Depending on version string execute the right query
         if "8.0" in version or "8.4" in version:
             cursor.execute("SHOW REPLICA STATUS")
         else:
             cursor.execute("SHOW SLAVE STATUS")
-        # Fetch the status
         status = cursor.fetchone()
-
-        # process status to check the delay, I/O and SQL threads etc.
         if status is not None:
-            # maps the status to a dictionary
             status_dict = dict(zip(cursor.column_names, status))
-
-            # Check if the replica IO and SQL threads are running
             io_running = status_dict.get('Replica_IO_Running') or status_dict.get('Slave_IO_Running')
             sql_running = status_dict.get('Replica_SQL_Running') or status_dict.get('Slave_SQL_Running')
-
-            # Retrieve and print the source server
             source_server = status_dict.get('Source_Host') or status_dict.get('Master_Host')
-
-            # Check SSL status
             ssl_allowed = status_dict.get('Source_SSL_Allowed') or "No"
-
             delay_val = 'Seconds_Behind_Source' if "8.0" in version or "8.4" in version else 'Seconds_Behind_Master'
-
             if delay_val in status_dict:
                 delay = status_dict[delay_val]
-
                 if delay > args.critical_delay:
                     delay_status = "CRITICAL: Replica replication delay is over the critical delay"
                 elif delay > args.warning_delay:
                     delay_status = "WARNING: Replica replication delay is over the warning delay"
                 else:
                     delay_status = "OK: Replica replication delay is within acceptable thresholds"
-
                 response_msg = (f"IO: {io_running}, SQL: {sql_running}, Server: {source_server}, SSL: {ssl_allowed}, "
                                 f"Delay: {delay}, {delay_status}")
-
             else:
                 response_msg = ("ERROR: Couldn't find 'Seconds_Behind_Master' or 'Seconds_Behind_Source' in the "
                                 "replica or slave status response!")
         else:
             response_msg = "ERROR: No replication status available!"
-
     except mysql.connector.Error as error:
         response_msg = f"ERROR: Something went wrong: {str(error)}"
-
     finally:
-        # Close cursor and connection
         if 'cnx' in locals() and cnx.is_connected():
             cursor.close()
             cnx.close()
@@ -129,6 +105,7 @@ def main():
     parser.add_argument('--use_ssl', type=str2bool, nargs='?',
                         const=True, default=False,
                         help='Use SSL connection')
+    parser.add_argument('--ssl_ca', type=str, help='Path to SSL CA file')
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
