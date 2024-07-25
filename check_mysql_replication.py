@@ -140,9 +140,9 @@ def main():
     parser.add_argument('--socket', type=str, help='Path to local mysqld socket')
     parser.add_argument('--username', type=str, help='MySQL username')
     parser.add_argument('--password', type=str, help='MySQL password')
-    parser.add_argument('--warning_delay', type=int, default=60,
+    parser.add_argument('--warning_delay', type=int, default=6000,
                         help='Warning delay of replica replication behind source (in seconds)')
-    parser.add_argument('--critical_delay', type=int, default=120,
+    parser.add_argument('--critical_delay', type=int, default=12000,
                         help='Critical delay of replica replication behind source (in seconds)')
     parser.add_argument('--use_ssl', type=str2bool, nargs='?',
                         const=True, default=True,  # changed the 'default' value to "True"
