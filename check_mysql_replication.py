@@ -15,11 +15,10 @@ except ModuleNotFoundError as err:
 
 
 def check_replication_status(args):
-
-    # Changes are here, add `not` before `args.use_ssl`
-    ssl_disabled = {'use_pure': True, 'ssl_disabled': not args.use_ssl} if not args.use_ssl else \
-        {'use_pure': True, 'ssl_ca': '/etc/ssl' '/certs' '/ca' '-certificates.crt', 'ssl_verify_cert':
-            not args.allow_self_signed}
+    # Below `ssl_disabled` is updated to use SSL for connections
+    ssl_disabled = {'use_pure': True}
+    ssl_disabled['ssl_ca'] = '/etc/ssl' '/certs' '/ca' '-certificates.crt'
+    ssl_disabled['ssl_verify_cert'] = not args.allow_self_signed
 
     # Read from configuration file if provided
     config = {}
@@ -33,10 +32,11 @@ def check_replication_status(args):
     if args.host: config['host'] = args.host
     if args.port: config['port'] = args.port
     if args.socket: config['unix_socket'] = args.socket
-    config['ssl_disabled'] = ssl_disabled
-    config['auth_plugin'] = 'sha256_password'
 
+    config.update(ssl_disabled)  # Add the SSL configurations to the existing configurations
+    config['auth_plugin'] = 'sha256_password'
     response_msg = ""
+
     try:
         # Establish MySQL connection
         cnx = mysql.connector.connect(**config)
@@ -130,7 +130,7 @@ def main():
     parser.add_argument('--critical_delay', type=int, default=30,
                         help='Critical delay of replica replication behind source (in seconds)')
     parser.add_argument('--use_ssl', type=str2bool, nargs='?',
-                        const=True, default=False,
+                        const=True, default=True,  # changed the 'default' value to "True"
                         help='Use SSL connection')
 
     if len(sys.argv) == 1:
