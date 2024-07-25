@@ -99,8 +99,8 @@ def check_replication_status(args):
 
 
         else:
-            response_msg = "Warning: No replication status available!"
-            os._exit(1)  # Change exit status to 1 for warnings
+            print("WARNING: No replication status available!")
+            os._exit(1)  # Change exit status to 1 for warningsChange exit status to 1 for warnings
 
 
     except mysql.connector.Error as error:
