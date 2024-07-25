@@ -79,28 +79,28 @@ def check_replication_status(args):
                 delay = status_dict[delay_val]
 
                 if delay > args.critical_delay:
-                    print("CRITICAL: Replica replication delay is over the critical delay")
-                    print(f"Current delay in replication: {delay} seconds")
+                    print("CRITICAL: Replica replication delay is over the critical delay.")
+                    print(" Current delay in replication: {delay} seconds")
 
                     os._exit(2)  # Change exit status to 2 for errors
 
                 elif delay > args.warning_delay:
-                    print("WARNING: Replica replication delay is over the warning delay")
-                    print(f"Current delay in replication: {delay} seconds")
+                    print("WARNING: Replica replication delay is over the warning delay.")
+                    print(" Current delay in replication: {delay} seconds")
 
                     os._exit(1)  # Change exit status to 2 for errors
 
                 else:
                     delay_status = "OK: Replica replication delay is within acceptable thresholds"
 
-                response_msg = (f"IO: {io_running}, SQL: {sql_running}, Host: {args.host}, Source: {source_server}, SSL: {ssl_allowed}, "
-                                f"Delay: {delay}, {delay_status}")
+                response_msg = (
+                    f"IO: {io_running}, SQL: {sql_running}, Host: {args.host}, Source: {source_server}, SSL: {ssl_allowed},"
+                    f"Delay: {delay}, {delay_status}")
 
             else:
-                print("ERROR: Couldn't find 'Seconds_Behind_Master' or 'Seconds_Behind_Source' in the "
-                      "replica or slave status response!")
+                print("ERROR: Couldn't find 'Seconds_Behind_Master' or 'Seconds_Behind_Source' in the replica or "
+                      "slave status response!")
                 os._exit(2)  # Change exit
-
 
         else:
             print("WARNING: No replication status available!")
