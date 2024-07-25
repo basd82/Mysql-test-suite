@@ -93,7 +93,7 @@ def check_replication_status(args):
                 else:
                     delay_status = "OK: Replica replication delay is within acceptable thresholds"
 
-                response_msg = (f"IO: {io_running}, SQL: {sql_running}, Server: {source_server}, SSL: {ssl_allowed}, "
+                response_msg = (f"IO: {io_running}, SQL: {sql_running}, Host: {args.host}, Source: {source_server}, SSL: {ssl_allowed}, "
                                 f"Delay: {delay}, {delay_status}")
 
             else:
