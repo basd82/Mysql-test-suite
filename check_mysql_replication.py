@@ -8,6 +8,7 @@ try:
     import mysql.connector
     import configparser
     import sys
+    import os
 
 except ModuleNotFoundError as err:
     print(f"A required module is not installed: {err}")
@@ -43,7 +44,8 @@ def check_replication_status(args):
         cursor = cnx.cursor()
     except mysql.connector.errors.InterfaceError as error:
         print(f"ERROR: Cannot connect to the MySQL server: {error}")
-        sys.exit(1)
+        os._exit(2)  # Change exit status to 2 for errors
+
     try:
         # Execute the query to get the MySQL version
         cursor.execute("SELECT VERSION()")
@@ -78,8 +80,12 @@ def check_replication_status(args):
 
                 if delay > args.critical_delay:
                     delay_status = "CRITICAL: Replica replication delay is over the critical delay"
+                    os._exit(2)  # Change exit status to 2 for errors
+
                 elif delay > args.warning_delay:
                     delay_status = "WARNING: Replica replication delay is over the warning delay"
+                    os._exit(1)  # Change exit status to 2 for errors
+
                 else:
                     delay_status = "OK: Replica replication delay is within acceptable thresholds"
 
@@ -89,8 +95,13 @@ def check_replication_status(args):
             else:
                 response_msg = ("ERROR: Couldn't find 'Seconds_Behind_Master' or 'Seconds_Behind_Source' in the "
                                 "replica or slave status response!")
+                os._exit(2)  # Change exit status to 2 for errors
+
+
         else:
-            response_msg = "ERROR: No replication status available!"
+            response_msg = "Warning: No replication status available!"
+            os._exit(1)  # Change exit status to 1 for warnings
+
 
     except mysql.connector.Error as error:
         response_msg = f"ERROR: Something went wrong: {str(error)}"
