@@ -93,9 +93,9 @@ def check_replication_status(args):
                                 f"Delay: {delay}, {delay_status}")
 
             else:
-                print = ("ERROR: Couldn't find 'Seconds_Behind_Master' or 'Seconds_Behind_Source' in the "
-                         "replica or slave status response!")
-                os._exit(2)  # Change exit status to 2 for errors
+                print("ERROR: Couldn't find 'Seconds_Behind_Master' or 'Seconds_Behind_Source' in the "
+                      "replica or slave status response!")
+                os._exit(2)  # Change exit
 
 
         else:
