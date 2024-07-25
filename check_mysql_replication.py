@@ -79,11 +79,11 @@ def check_replication_status(args):
                 delay = status_dict[delay_val]
 
                 if delay > args.critical_delay:
-                    print = "CRITICAL: Replica replication delay is over the critical delay"
+                    print("CRITICAL: Replica replication delay is over the critical delay")
                     os._exit(2)  # Change exit status to 2 for errors
 
                 elif delay > args.warning_delay:
-                    print = "WARNING: Replica replication delay is over the warning delay"
+                    print("WARNING: Replica replication delay is over the warning delay")
                     os._exit(1)  # Change exit status to 2 for errors
 
                 else:
@@ -94,7 +94,7 @@ def check_replication_status(args):
 
             else:
                 print = ("ERROR: Couldn't find 'Seconds_Behind_Master' or 'Seconds_Behind_Source' in the "
-                                "replica or slave status response!")
+                         "replica or slave status response!")
                 os._exit(2)  # Change exit status to 2 for errors
 
 
