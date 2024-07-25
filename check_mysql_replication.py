@@ -80,10 +80,14 @@ def check_replication_status(args):
 
                 if delay > args.critical_delay:
                     print("CRITICAL: Replica replication delay is over the critical delay")
+                    print(f"Current delay in replication: {delay} seconds")
+
                     os._exit(2)  # Change exit status to 2 for errors
 
                 elif delay > args.warning_delay:
                     print("WARNING: Replica replication delay is over the warning delay")
+                    print(f"Current delay in replication: {delay} seconds")
+
                     os._exit(1)  # Change exit status to 2 for errors
 
                 else:
