@@ -9,6 +9,7 @@ try:
     import configparser
     import sys
     import os
+    import syslog
 
 except ModuleNotFoundError as err:
     print(f"A required module is not installed: {err}")
@@ -43,7 +44,9 @@ def check_replication_status(args):
         cnx = mysql.connector.connect(**config)
         cursor = cnx.cursor()
     except mysql.connector.errors.InterfaceError as error:
-        print(f"ERROR: Cannot connect to the MySQL server: {error}")
+        error_message = (f"ERROR: Cannot connect to the MySQL server: {error}")
+        print(error_message)
+        syslog.syslog(syslog.LOG_ERR, error_message)
         os._exit(2)  # Change exit status to 2 for errors
 
     try:
@@ -79,13 +82,17 @@ def check_replication_status(args):
                 delay = status_dict[delay_val]
 
                 if delay > args.critical_delay:
-                    print(f"CRITICAL: Replica replication delay is over the critical delay. Current delay in replication: {delay} seconds")
-
+                    error_message = (
+                        f"CRITICAL: Replica replication delay is over the critical delay. Current delay in replication: {delay} seconds")
+                    print(error_message)
+                    syslog.syslog(syslog.LOG_ERR, error_message)
                     os._exit(2)  # Change exit status to 2 for errors
 
                 elif delay > args.warning_delay:
-                    print(f"WARNING: Replica replication delay is over the warning delay. Current delay in replication: {delay} seconds")
-
+                    error_message = (
+                        f"WARNING: Replica replication delay is over the warning delay. Current delay in replication: {delay} seconds")
+                    print(error_message)
+                    syslog.syslog(syslog.LOG_ERR, error_message)
                     os._exit(1)  # Change exit status to 2 for errors
 
                 else:
@@ -96,12 +103,17 @@ def check_replication_status(args):
                     f"Delay: {delay}, {delay_status}")
 
             else:
-                print("ERROR: Couldn't find 'Seconds_Behind_Master' or 'Seconds_Behind_Source' in the replica or "
-                      "slave status response!")
+                error_message = (
+                    "ERROR: Couldn't find 'Seconds_Behind_Master' or 'Seconds_Behind_Source' in the replica or "
+                    "slave status response!")
+                print(error_message)
+                syslog.syslog(syslog.LOG_ERR, error_message)
                 os._exit(2)  # Change exit
 
         else:
-            print("WARNING: No replication status available!")
+            error_message = ("WARNING: No replication status available!")
+            print(error_message)
+            syslog.syslog(syslog.LOG_ERR, error_message)
             os._exit(1)  # Change exit status to 1 for warningsChange exit status to 1 for warnings
 
 
